@@ -5,11 +5,15 @@ import PackageDescription
 
 let package = Package(
     name: "XMLTV",
+    platforms: [
+        .macOS(.v10_12),
+    ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "XMLTV",
-            targets: ["XMLTV"]),
+            targets: ["XMLTV"]
+        ),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -21,9 +25,11 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages which this package depends on.
         .target(
             name: "XMLTV",
-            dependencies: ["LightXMLParser"]),
+            dependencies: ["LightXMLParser"]
+        ),
         .testTarget(
             name: "XMLTVTests",
-            dependencies: ["XMLTV"]),
+            dependencies: ["XMLTV"]
+        ),
     ]
 )

@@ -2,7 +2,6 @@ import XCTest
 @testable import XMLTV
 
 final class XMLTVTests: XCTestCase {
-    
     let xmltvExample = """
     <tv>
         <channel id="Example">
@@ -28,35 +27,60 @@ final class XMLTVTests: XCTestCase {
         </programme>
     </tv>
     """
-    
+
+    func testBenchmark() {
+        let file = "response.xml"
+
+        let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(file, isDirectory: false)
+
+        var text2 = xmltvExample
+        do {
+            text2 = try String(contentsOf: fileURL, encoding: .utf8)
+        } catch {
+            XCTFail("Unable to read \(fileURL) \(error)")
+        }
+
+        let data = text2.data(using: .utf8)!
+
+      measure() {
+          let xmltv = try? XMLTV(data: data)
+          XCTAssertNotNil(xmltv)
+          let channels = xmltv!.getChannels()
+          let programs = xmltv!.getPrograms()
+          
+          XCTAssertEqual(channels.count, 1244, "channels not parsed")
+          XCTAssertEqual(programs.count, 1002, "programms not parsed")
+      }
+    }
+
     func testChannel() {
         let data = xmltvExample.data(using: .utf8)!
         let xmltv = try? XMLTV(data: data)
-        
+
         XCTAssertNotNil(xmltv)
-        
+
         let channels = xmltv!.getChannels()
         XCTAssert(channels.count == 1)
-        
+
         let channel = channels[0]
         XCTAssert(channel.name == "Example channel")
         XCTAssert(channel.id == "Example")
         XCTAssert(channel.url == "https://example.com")
         XCTAssert(channel.icon == nil)
     }
-    
+
     func testProgram() {
         let data = xmltvExample.data(using: .utf8)!
         let xmltv = try? XMLTV(data: data)
-        
+
         XCTAssertNotNil(xmltv)
-        
+
         let channel = xmltv!.getChannels()[0]
         let programs = xmltv!.getPrograms(channel: channel)
         XCTAssert(programs.count == 1)
-        
+
         let program = programs[0]
-        XCTAssert(program.channel.id == channel.id)
+        XCTAssert(program.channelID == channel.id)
         XCTAssert(program.start == Date.parse(tvDate: "20200121103000 +0100"))
         XCTAssert(program.stop == Date.parse(tvDate: "20200121110000 +0100"))
         XCTAssert(program.title == "First")
